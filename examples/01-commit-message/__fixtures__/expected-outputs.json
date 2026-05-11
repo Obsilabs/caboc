@@ -1,0 +1,32 @@
+{
+  "type": "fix",
+  "scope": "pagination",
+  "subject": "include final page item in inclusive range check",
+  "body_md": "`itemsInRange` was using a strict less-than against `range.end`, which silently dropped the item at the upper bound of every page. The `PageRange` contract treats `end` as inclusive, so the loop now uses `<=`.\n\nA regression test pins the new behavior: a range `{ start: 1, end: 3 }` over four items must return three items, not two.",
+  "breaking_change": false,
+  "breaking_note": "",
+  "confidence": 0.88,
+  "_note": "Reference output for conformance checks. LLM outputs vary; treat this as a quality target, not a strict assertion. Acceptable variations: subject wording, body phrasing, confidence within +/- 0.1.",
+  "_expected_citations": [
+    {
+      "part": "type",
+      "hunk_excerpt": "-    if (i < range.end) {\n+    if (i <= range.end) {"
+    },
+    {
+      "part": "scope",
+      "hunk_excerpt": "diff --git a/packages/pagination/src/range.ts b/packages/pagination/src/range.ts"
+    },
+    {
+      "part": "subject",
+      "hunk_excerpt": "-    if (i < range.end) {\n+    if (i <= range.end) {"
+    },
+    {
+      "part": "body",
+      "hunk_excerpt": "it('includes the item at range.end (inclusive upper bound)'"
+    },
+    {
+      "part": "breaking",
+      "hunk_excerpt": "internal helper itemsInRange; signature unchanged"
+    }
+  ]
+}

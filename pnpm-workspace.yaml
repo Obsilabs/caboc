@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: 2026 CABOC contributors
+# SPDX-License-Identifier: Apache-2.0
+
+packages:
+  - "packages/*"
+  - "skills/*"
+  - "examples/*"

@@ -4,18 +4,57 @@
 import { z } from "zod";
 
 /**
- * Frontmatter for a routine's WORKFLOW.md.
+ * Shared sub-schemas.
+ */
+const IoSection = z
+  .object({
+    inputs: z.record(z.unknown()).optional(),
+    outputs: z.record(z.unknown()).optional(),
+  })
+  .partial()
+  .strict();
+
+const BudgetSection = z
+  .object({
+    tokens: z.number().int().nonnegative().optional(),
+    wall_minutes: z.number().int().nonnegative().optional(),
+    money_usd: z.number().nonnegative().optional(),
+  })
+  .partial()
+  .strict();
+
+const SessionSection = z
+  .object({
+    capability: z
+      .enum(["reasoning", "classification", "structured_extraction", "vision"])
+      .optional(),
+    tier: z.enum(["fast", "balanced", "deep"]).optional(),
+    allowed_modes: z.array(z.enum(["fresh", "continuous", "fork"])).optional(),
+  })
+  .partial()
+  .strict();
+
+/**
+ * Frontmatter for a routine's `WORKFLOW.md`.
  *
- * Intentionally minimal for v0.1. No model names — those are runtime concerns,
- * not authoring concerns.
+ * Mirrors `docs/norms/STANDARDS_ROUTINES.md` §2.
  */
 export const WorkflowFrontmatter = z
   .object({
-    name: z.string().min(1),
+    workflow: z.string().min(1),
     version: z.string().min(1),
+    spec_version: z.string().min(1).optional(),
     description: z.string().optional(),
-    inputs: z.record(z.unknown()).optional(),
-    outputs: z.record(z.unknown()).optional(),
+    namespace: z.string().optional(),
+    owner: z.string().optional(),
+    io: IoSection.optional(),
+    budget: BudgetSection.optional(),
+    triggers: z.array(z.record(z.unknown())).optional(),
+    imports: z.array(z.record(z.unknown())).optional(),
+    attestation: z.record(z.unknown()).optional(),
+    memory: z.record(z.unknown()).optional(),
+    trust: z.record(z.unknown()).optional(),
+    invariants: z.array(z.unknown()).optional(),
   })
   .strict();
 
@@ -24,16 +63,25 @@ export type WorkflowFrontmatter = z.infer<typeof WorkflowFrontmatter>;
 /**
  * Frontmatter for an agent's `<name>.agent.md`.
  *
- * `model` is deliberately rejected — see denylist in cmd-lint. Agents declare
- * capability requirements, not concrete model identifiers.
+ * Mirrors `docs/norms/STANDARDS_ROUTINES.md` §4.
  */
 export const AgentFrontmatter = z
   .object({
-    name: z.string().min(1),
+    agent: z.string().min(1),
+    version: z.string().min(1),
+    spec_version: z.string().min(1).optional(),
     description: z.string().optional(),
-    capabilities: z.array(z.string()).optional(),
-    inputs: z.record(z.unknown()).optional(),
-    outputs: z.record(z.unknown()).optional(),
+    session: SessionSection.optional(),
+    io: IoSection.optional(),
+    imports: z
+      .object({
+        skills: z.array(z.unknown()).optional(),
+        mcp: z.array(z.unknown()).optional(),
+        capabilities: z.array(z.unknown()).optional(),
+      })
+      .partial()
+      .strict()
+      .optional(),
   })
   .strict();
 
@@ -45,15 +93,14 @@ export type AgentFrontmatter = z.infer<typeof AgentFrontmatter>;
  */
 export const RoutineLockfile = z
   .object({
-    version: z.literal(1),
-    routine: z.object({
-      name: z.string(),
-      version: z.string(),
-    }),
+    lockfile_version: z.literal(1),
+    routine_version: z.string(),
+    spec_version: z.string(),
+    workflow_sha256: z.string().length(64),
     agents: z.record(
       z.object({
-        path: z.string(),
-        hash: z.string(),
+        sha256: z.string().length(64),
+        version: z.string(),
       }),
     ),
   })

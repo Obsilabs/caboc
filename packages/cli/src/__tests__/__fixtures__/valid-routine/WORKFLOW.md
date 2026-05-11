@@ -1,13 +1,15 @@
 ---
-name: valid-routine
+workflow: valid_routine
 version: 0.1.0
+spec_version: caboc-llm/0.1.0
 description: A minimal valid workflow used by the lint test suite.
-inputs:
-  topic:
-    type: string
-outputs:
-  summary_md:
-    type: string
+io:
+  inputs:
+    topic:
+      type: string
+  outputs:
+    summary_md:
+      type: string
 ---
 
 # PROCEDURE

@@ -139,11 +139,11 @@ export async function run(args: string[]): Promise<number> {
       outputs &&
       typeof outputs === "object" &&
       "summary_md" in (outputs as Record<string, unknown>) &&
-      typeof (outputs as Record<string, unknown>).summary_md === "string"
+      typeof (outputs as Record<string, unknown>)["summary_md"] === "string"
     ) {
       stdout.write("summary_md:\n");
       stdout.write(
-        truncate((outputs as Record<string, unknown>).summary_md as string),
+        truncate((outputs as Record<string, unknown>)["summary_md"] as string),
       );
       stdout.write("\n");
     } else {

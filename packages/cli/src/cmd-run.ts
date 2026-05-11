@@ -11,7 +11,10 @@ function parseArgs(args: string[]): { dir?: string; inputs?: string } {
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
     if (a === "--inputs" || a === "-i") {
-      out.inputs = args[++i];
+      const next = args[++i];
+      if (next !== undefined) {
+        out.inputs = next;
+      }
     } else if (a && !a.startsWith("-") && !out.dir) {
       out.dir = a;
     }

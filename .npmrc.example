@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2026 CABOC contributors
+# SPDX-License-Identifier: Apache-2.0
+
+# Local auth template — copy to ~/.npmrc (NEVER commit a copy with the token).
+# After `npm login` interactive flow, npm writes the line below automatically.
+# For CI, set the NPM_TOKEN environment variable instead and reference it here.
+
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+
+# Optional: scope-specific tokens for private mirrors.
+# //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}

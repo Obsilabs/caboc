@@ -1,6 +1,6 @@
 {
   "name": "@caboc/cli",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "CABOC CLI — scaffold, lint, and print prompts for markdown-only AI workflows.",
   "license": "Apache-2.0",
   "type": "module",

@@ -1,0 +1,7 @@
+{
+  "name": "@caboc/example-email-thread-summarize",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone CABOC routine example: read an email thread and emit TL;DR, participants, open questions, commitments, sentiment, and a suggested reply via a single reasoning agent.",
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "@caboc/example-design-doc-adversarial",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone CABOC routine example: adversarial review of a design doc by two parallel reviewers (blind-spot hunter + tradeoff critic) and a synthesizer.",
+  "license": "Apache-2.0"
+}

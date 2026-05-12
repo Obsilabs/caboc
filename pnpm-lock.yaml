@@ -17,6 +17,24 @@ importers:
 
   examples/01-commit-message: {}
 
+  examples/02-changelog-from-commits: {}
+
+  examples/03-bug-report-triage: {}
+
+  examples/04-customer-feedback-clusters: {}
+
+  examples/05-error-log-cluster: {}
+
+  examples/06-readme-quality-audit: {}
+
+  examples/07-meeting-notes-actions: {}
+
+  examples/08-design-doc-adversarial: {}
+
+  examples/09-email-thread-summarize: {}
+
+  examples/10-content-moderation-text: {}
+
   packages/cli:
     dependencies:
       yaml:

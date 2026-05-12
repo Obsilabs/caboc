@@ -9,7 +9,10 @@ const HELP = `caboc — CABOC routine CLI
 Usage:
   caboc init <routine-name>                    Scaffold a new routine.
   caboc lint <routine-dir>                     Validate frontmatter, refs, and denylist.
-  caboc run <routine-dir> --inputs <file>      Print the runtime prompt for an LLM.
+  caboc add <source>[@ref][#subpath]           Install a routine from git / HTTPS / local path.
+  caboc list                                   List installed routines and aliases.
+  caboc remove <alias>                         Uninstall a routine.
+  caboc run <alias|routine-dir> --inputs <f>   Print the runtime prompt for an LLM.
   caboc inspect <run-dir>                      Pretty-print a past run.
 
 Flags:
@@ -27,8 +30,8 @@ async function main(): Promise<number> {
   }
 
   if (first === "-v" || first === "--version" || first === "version") {
-    // Kept in sync with package.json manually; v0.1 is fine.
-    stdout.write("0.1.0\n");
+    // Kept in sync with package.json manually.
+    stdout.write("0.2.0\n");
     return 0;
   }
 
@@ -41,6 +44,20 @@ async function main(): Promise<number> {
     }
     case "lint": {
       const mod = await import("./cmd-lint.js");
+      return mod.run(rest);
+    }
+    case "add": {
+      const mod = await import("./cmd-add.js");
+      return mod.run(rest);
+    }
+    case "list":
+    case "ls": {
+      const mod = await import("./cmd-list.js");
+      return mod.run(rest);
+    }
+    case "remove":
+    case "rm": {
+      const mod = await import("./cmd-remove.js");
       return mod.run(rest);
     }
     case "run": {

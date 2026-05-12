@@ -1,0 +1,30 @@
+{
+  "our_team_domain": "acme.example",
+  "thread": [
+    {
+      "from": "sarah@bigco.example",
+      "ts": "2026-04-28T09:14:00Z",
+      "body": "Hi Alex,\n\nWe're trying to wire up the Acme webhook into our order pipeline and the signature validation keeps failing on our staging environment. We followed the v2 docs but the HMAC headers don't match what your library expects. Could you confirm whether the signing secret rotates per-environment, or is there one shared secret per workspace?\n\nWe'd like to be in production by May 9 for the pilot launch.\n\nThanks,\nSarah"
+    },
+    {
+      "from": "alex@acme.example",
+      "ts": "2026-04-29T16:42:00Z",
+      "body": "Hi Sarah,\n\nThanks for the note — looping in our integrations team. We'll get back to you with a definitive answer on the signing secret behavior. In the meantime, can you share the exact error string and the headers you're sending?\n\nBest,\nAlex"
+    },
+    {
+      "from": "sarah@bigco.example",
+      "ts": "2026-05-01T10:05:00Z",
+      "body": "Hi Alex,\n\nHere's the error we see on every webhook delivery:\n\n  WebhookSignatureMismatch: expected sha256=ab12..., got sha256=cd34...\n\nHeaders we send back on the ack include X-Acme-Signature and X-Acme-Timestamp, computed exactly as the docs describe. We're using the staging secret from the workspace settings page.\n\nAny update from the integrations team? We're now a week from the pilot launch and this is the only blocker.\n\nSarah"
+    },
+    {
+      "from": "alex@acme.example",
+      "ts": "2026-05-05T11:28:00Z",
+      "body": "Hi Sarah,\n\nApologies for the slow turnaround — we had a partial outage on Friday that pulled the team off. I'll chase the integrations folks today and have something concrete for you by tomorrow.\n\nIn parallel: have you considered using our managed delivery option? It removes the signature handling on your side entirely.\n\nThanks for your patience,\nAlex"
+    },
+    {
+      "from": "sarah@bigco.example",
+      "ts": "2026-05-11T08:47:00Z",
+      "body": "Alex,\n\nIt's been almost two weeks and we still don't have an answer on whether the signing secret is per-environment or per-workspace. We are four days from our pilot launch and I have an exec asking why we are blocked on a vendor integration. The managed delivery option is not on the table — we have a compliance review that took six weeks to clear our current architecture and we can't redo it.\n\nI need a real answer today, and ideally a call with someone on your integrations team. Otherwise we will need to escalate this internally and re-evaluate the pilot timeline.\n\nSarah"
+    }
+  ]
+}

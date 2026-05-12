@@ -1,0 +1,7 @@
+{
+  "name": "@caboc/example-error-log-cluster",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone CABOC routine example: group raw log lines by error signature, count, tag severity, and emit an SRE investigation plan.",
+  "license": "Apache-2.0"
+}

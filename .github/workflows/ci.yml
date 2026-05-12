@@ -1,0 +1,96 @@
+# SPDX-FileCopyrightText: 2026 CABOC contributors
+# SPDX-License-Identifier: Apache-2.0
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build + Test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['20', '22']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Test
+        run: pnpm -r test
+
+      - name: Lint all examples
+        run: |
+          for dir in examples/*/; do
+            echo "::group::$dir"
+            node packages/cli/dist/index.js lint "$dir"
+            echo "::endgroup::"
+          done
+
+  conventional-commits:
+    name: PR title — Conventional Commits
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            test
+            chore
+            build
+            ci
+            perf
+
+  no-model-literals:
+    name: Denylist — no model names in source or routines
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan
+        run: |
+          set -e
+          # Search source + routines + examples + skills; skip dist/ + node_modules/ + locks.
+          if grep -RInE 'claude-(opus|sonnet|haiku|[0-9])|gpt-[0-9]|gemini-[0-9]|mistral-(large|medium|small)|llama-[0-9]' \
+              --include='*.md' --include='*.ts' --include='*.json' --include='*.yaml' \
+              --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git \
+              --exclude='package-lock.json' --exclude='pnpm-lock.yaml' .; then
+            echo "::error::Model name literal found in repository."
+            exit 1
+          fi
+          echo "denylist clean"

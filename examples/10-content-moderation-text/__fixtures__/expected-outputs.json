@@ -1,0 +1,20 @@
+{
+  "scores": {
+    "sexual": 0.0,
+    "violence": 0.05,
+    "hate": 0.4,
+    "self_harm": 0.0,
+    "illegal": 0.0,
+    "spam": 0.2,
+    "pii_leak": 0.0,
+    "csam": 0.0
+  },
+  "verdict": "allow",
+  "flagged_phrases": [
+    "your support team is incompetent",
+    "literally nobody on your staff knows what they're doing",
+    "fix your garbage software"
+  ],
+  "rationale_md": "Frustrated-user complaint with mild aggressive language directed at the support team as a group, not at a named individual. `hate` lands around 0.4 (insulting but generic, no protected-class targeting, no slur). `spam` ~0.2 (rant-shaped, but a single first-person complaint rather than promotional or repetitive content). All other categories effectively zero. No score reaches 0.85, sum of scores >= 0.55 stays well under 1.2, so the rubric resolves to `allow`. No score lands in the 0.55 - 0.85 uncertain zone, so the agent itself does not request human review.",
+  "requires_human_review": false
+}

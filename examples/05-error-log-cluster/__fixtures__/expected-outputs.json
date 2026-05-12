@@ -1,0 +1,55 @@
+{
+  "groups": [
+    {
+      "signature": "api-server OOMKilled",
+      "count": 3,
+      "severity": "critical",
+      "suggested_check": "Check pod memory limits and last 24h restarts on api-server; correlate with recent deploys.",
+      "example_line": "2026-05-12T10:02:11.482Z ERROR api-server pod=api-7d9c8b-x4q2 OOMKilled memory_usage=2147483648 limit=2147483648"
+    },
+    {
+      "signature": "payments-gateway 502 upstream timeout",
+      "count": 8,
+      "severity": "high",
+      "suggested_check": "Inspect upstream payments-psp-eu1 health and the 30s timeout SLO on payments-gateway.",
+      "example_line": "2026-05-12T10:02:34.119Z ERROR payments-gateway req=req_a1b2c3d4 upstream=payments-psp-eu1 status=502 message=\"upstream timeout after 30000ms\""
+    },
+    {
+      "signature": "orders-worker psycopg DeadlockDetected on orders",
+      "count": 4,
+      "severity": "high",
+      "suggested_check": "Run pg_stat_activity for blocking sessions on the orders table and review recent transaction patterns.",
+      "example_line": "2026-05-12T10:03:14.221Z ERROR orders-worker psycopg.errors.DeadlockDetected on relation \"orders\" pid=48211 detail=\"Process 48211 waits for ShareLock on transaction 9912; blocked by 48199.\""
+    },
+    {
+      "signature": "cache-client redis connection refused",
+      "count": 3,
+      "severity": "high",
+      "suggested_check": "Verify the redis primary is reachable from the cache-client subnet and check for a recent failover.",
+      "example_line": "2026-05-12T10:04:35.207Z ERROR cache-client redis://10.42.18.91:6379 connection refused after 3 retries"
+    },
+    {
+      "signature": "notifications-email 400 invalid recipient",
+      "count": 4,
+      "severity": "medium",
+      "suggested_check": "Sample recent recipient inputs from upstream callers and validate the email format at ingestion.",
+      "example_line": "2026-05-12T10:04:19.811Z WARN  notifications-email validation failed status=400 field=recipient reason=\"not a valid email address\" trace=trace_5511aa"
+    },
+    {
+      "signature": "api-server deprecation legacy_user_id",
+      "count": 3,
+      "severity": "low",
+      "suggested_check": "Track which internal callers still send legacy_user_id and schedule their migration before v3.",
+      "example_line": "2026-05-12T10:03:01.770Z WARN  api-server deprecation: field 'legacy_user_id' will be removed in v3; caller=svc-orders"
+    }
+  ],
+  "priority_order": [
+    "api-server OOMKilled",
+    "payments-gateway 502 upstream timeout",
+    "orders-worker psycopg DeadlockDetected on orders",
+    "cache-client redis connection refused",
+    "notifications-email 400 invalid recipient",
+    "api-server deprecation legacy_user_id"
+  ],
+  "investigation_plan_md": "1. `api-server OOMKilled` — critical, 3 occurrences. Check pod memory limits and last 24h restarts on api-server; if confirmed, correlate with recent memory-limit changes or deploys.\n2. `payments-gateway 502 upstream timeout` — high, 8 occurrences. Inspect upstream payments-psp-eu1 health and the 30s timeout SLO on payments-gateway.\n3. `orders-worker psycopg DeadlockDetected on orders` — high, 4 occurrences. Run pg_stat_activity for blocking sessions on the orders table and review recent transaction patterns.\n4. `cache-client redis connection refused` — high, 3 occurrences. Verify the redis primary is reachable from the cache-client subnet and check for a recent failover.\n5. `notifications-email 400 invalid recipient` — medium, 4 occurrences. Sample recent recipient inputs from upstream callers and validate the email format at ingestion.\n6. `api-server deprecation legacy_user_id` — low, 3 occurrences. Track which internal callers still send legacy_user_id and schedule their migration before v3."
+}

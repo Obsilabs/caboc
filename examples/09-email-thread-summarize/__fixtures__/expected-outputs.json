@@ -1,0 +1,32 @@
+{
+  "tldr_md": "# Acme webhook signature mismatch blocking BigCo pilot\n\nSarah at BigCo opened a support thread on 2026-04-28 about HMAC signature validation failing on the Acme v2 webhook in staging. She needs to know whether the signing secret is per-environment or per-workspace. Two weeks in, she still does not have an answer. The pilot launch is in four days (2026-05-15) and she is now threatening to escalate internally and reassess the timeline. Managed delivery (suggested by Alex) is not viable — BigCo's compliance review of the current architecture took six weeks and cannot be redone.",
+  "participants": [
+    { "email": "sarah@bigco.example", "role": "customer" },
+    { "email": "alex@acme.example", "role": "us" }
+  ],
+  "open_questions": [
+    "Is the Acme webhook signing secret per-environment or per-workspace?",
+    "When will the Acme integrations team respond with a definitive answer?",
+    "Can Acme schedule a call between Sarah and the integrations team today?"
+  ],
+  "commitments": [
+    {
+      "who": "alex@acme.example",
+      "what": "Loop in the integrations team and return with a definitive answer on signing secret behavior",
+      "when": "2026-04-29"
+    },
+    {
+      "who": "alex@acme.example",
+      "what": "Chase the integrations team and provide a concrete answer",
+      "when": "2026-05-06"
+    },
+    {
+      "who": "sarah@bigco.example",
+      "what": "Ship the Acme webhook integration to production for the pilot launch",
+      "when": "2026-05-09"
+    }
+  ],
+  "sentiment": "at_risk",
+  "suggested_reply_md": "Hi Sarah,\n\nYou are right to push — this has gone on too long and I own the delay. Setting expectations straight:\n\n- **Signing secret answer, today.** I am pinging our integrations lead directly the moment I send this and will reply on this thread with the definitive per-environment vs per-workspace answer before end of business today.\n- **Call with integrations, today or tomorrow.** I will hold a 30-minute slot with our integrations engineer for any time you pick in the next 24 hours. Reply with two windows that work and I will confirm one.\n- **Managed delivery is off the table** — understood, we will not raise it again. We will solve the signature mismatch in your current architecture.\n- **Pilot date.** I know you are launching 2026-05-15. We will treat this as a P1 on our side until you are unblocked.\n\nIf I do not have the signing-secret answer to you by end of business, please escalate to my manager, Priya Rao (priya@acme.example), and I will brief her in advance.\n\nApologies for the runaround.\n\nAlex",
+  "suggested_reply_tone": "escalate"
+}

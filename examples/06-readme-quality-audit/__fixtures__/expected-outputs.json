@@ -1,0 +1,13 @@
+{
+  "scores": {
+    "what": 8,
+    "install": 0,
+    "usage": 8,
+    "api": 6,
+    "license": 7,
+    "contributing": 0
+  },
+  "missing_sections": ["Installation", "Contributing", "API reference"],
+  "critique_md": "The opening lands well. The tagline (\"tiny in-memory LRU cache for TypeScript, zero deps, ~1KB gzipped\") tells a first-time reader what they're looking at, who it's for, and where the tradeoffs sit — and the \"When not to use this\" section is the kind of honesty that earns trust. The Quickstart is also solid: a runnable basic block plus a realistic async-loader pattern, both copy-pasteable.\n\nThe single highest-impact gap is that there is no `Installation` section. A reader reaches the first code block before they know the package name to install. Add an `Installation` block immediately under the tagline with `npm i @acme/tiny-cache` (and the `pnpm` / `yarn` equivalents), plus the Node 18+ requirement that's currently buried under `Status`.\n\nA secondary nit: the API surface is sketched (Features list, Options table) but the public methods — `get`, `set`, `has`, `delete`, `clear`, `keys`, plus the `onEvict` callback signature — are only visible through the example code. A short `API reference` section, or a link to generated docs, would unblock anyone past the Quickstart. There is also no `Contributing` guidance, so outside contributors have nowhere to start; even a one-line `CONTRIBUTING.md` link plus `pnpm test` in the README would help.",
+  "overall_grade": "C"
+}

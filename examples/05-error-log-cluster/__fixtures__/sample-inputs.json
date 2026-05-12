@@ -1,0 +1,30 @@
+{
+  "window_minutes": 30,
+  "log_lines": [
+    "2026-05-12T10:02:11.482Z ERROR api-server pod=api-7d9c8b-x4q2 OOMKilled memory_usage=2147483648 limit=2147483648",
+    "2026-05-12T10:02:34.119Z ERROR payments-gateway req=req_a1b2c3d4 upstream=payments-psp-eu1 status=502 message=\"upstream timeout after 30000ms\"",
+    "2026-05-12T10:03:01.770Z WARN  api-server deprecation: field 'legacy_user_id' will be removed in v3; caller=svc-orders",
+    "2026-05-12T10:03:14.221Z ERROR orders-worker psycopg.errors.DeadlockDetected on relation \"orders\" pid=48211 detail=\"Process 48211 waits for ShareLock on transaction 9912; blocked by 48199.\"",
+    "2026-05-12T10:03:48.003Z ERROR payments-gateway req=req_9f8e7d6c upstream=payments-psp-eu1 status=502 message=\"upstream timeout after 30000ms\"",
+    "2026-05-12T10:04:02.554Z ERROR api-server pod=api-7d9c8b-m11k OOMKilled memory_usage=2147483648 limit=2147483648",
+    "2026-05-12T10:04:19.811Z WARN  notifications-email validation failed status=400 field=recipient reason=\"not a valid email address\" trace=trace_5511aa",
+    "2026-05-12T10:04:35.207Z ERROR cache-client redis://10.42.18.91:6379 connection refused after 3 retries",
+    "2026-05-12T10:04:58.642Z ERROR payments-gateway req=req_22aa11bb upstream=payments-psp-eu1 status=502 message=\"upstream timeout after 30000ms\"",
+    "2026-05-12T10:05:11.044Z ERROR orders-worker psycopg.errors.DeadlockDetected on relation \"orders\" pid=48244 detail=\"Process 48244 waits for ShareLock on transaction 9947; blocked by 48230.\"",
+    "2026-05-12T10:05:33.812Z WARN  notifications-email validation failed status=400 field=recipient reason=\"not a valid email address\" trace=trace_77ccdd",
+    "2026-05-12T10:05:47.901Z ERROR payments-gateway req=req_d3e4f5g6 upstream=payments-psp-eu1 status=502 message=\"upstream timeout after 30000ms\"",
+    "2026-05-12T10:06:02.118Z WARN  api-server deprecation: field 'legacy_user_id' will be removed in v3; caller=svc-billing",
+    "2026-05-12T10:06:21.450Z ERROR cache-client redis://10.42.18.91:6379 connection refused after 3 retries",
+    "2026-05-12T10:06:44.778Z ERROR payments-gateway req=req_h7i8j9k0 upstream=payments-psp-eu1 status=502 message=\"upstream timeout after 30000ms\"",
+    "2026-05-12T10:07:01.339Z ERROR api-server pod=api-7d9c8b-q88r OOMKilled memory_usage=2147483648 limit=2147483648",
+    "2026-05-12T10:07:18.992Z ERROR orders-worker psycopg.errors.DeadlockDetected on relation \"orders\" pid=48280 detail=\"Process 48280 waits for ShareLock on transaction 9981; blocked by 48266.\"",
+    "2026-05-12T10:07:34.121Z WARN  notifications-email validation failed status=400 field=recipient reason=\"not a valid email address\" trace=trace_99eeff",
+    "2026-05-12T10:07:55.504Z ERROR payments-gateway req=req_l1m2n3o4 upstream=payments-psp-eu1 status=502 message=\"upstream timeout after 30000ms\"",
+    "2026-05-12T10:08:12.067Z ERROR cache-client redis://10.42.18.91:6379 connection refused after 3 retries",
+    "2026-05-12T10:08:34.882Z ERROR payments-gateway req=req_p5q6r7s8 upstream=payments-psp-eu1 status=502 message=\"upstream timeout after 30000ms\"",
+    "2026-05-12T10:08:47.110Z WARN  notifications-email validation failed status=400 field=recipient reason=\"not a valid email address\" trace=trace_bb22cc",
+    "2026-05-12T10:09:03.554Z ERROR orders-worker psycopg.errors.DeadlockDetected on relation \"orders\" pid=48311 detail=\"Process 48311 waits for ShareLock on transaction 10004; blocked by 48298.\"",
+    "2026-05-12T10:09:21.700Z WARN  api-server deprecation: field 'legacy_user_id' will be removed in v3; caller=svc-search",
+    "2026-05-12T10:09:42.018Z ERROR payments-gateway req=req_t9u0v1w2 upstream=payments-psp-eu1 status=502 message=\"upstream timeout after 30000ms\""
+  ]
+}

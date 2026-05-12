@@ -1,0 +1,7 @@
+{
+  "name": "@caboc/example-readme-quality-audit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone CABOC routine example: score a project README on six dimensions, list missing sections, critique, grade.",
+  "license": "Apache-2.0"
+}

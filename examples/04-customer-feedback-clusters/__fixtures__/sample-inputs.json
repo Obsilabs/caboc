@@ -1,0 +1,64 @@
+{
+  "feedback_items": [
+    {
+      "id": "fb_001",
+      "text": "The new pricing page is confusing — I can't tell what's actually included in the Pro tier vs Team tier without clicking into three separate modals. We almost gave up and went with a competitor.",
+      "source": "intercom"
+    },
+    {
+      "id": "fb_002",
+      "text": "Onboarding wizard asked me the same question about team size twice in different wording. Also it wouldn't let me skip the Slack integration step even though we don't use Slack.",
+      "source": "in_app_survey"
+    },
+    {
+      "id": "fb_003",
+      "text": "The dashboard takes 8 seconds to paint after login and that's on a fast connection. It's been like this for two weeks. Please fix.",
+      "source": "support_email"
+    },
+    {
+      "id": "fb_004",
+      "text": "Love the new dark mode! Way easier on the eyes during late-night incident response. One nit: the sidebar contrast is a little low in dark mode, hard to read inactive items.",
+      "source": "twitter"
+    },
+    {
+      "id": "fb_005",
+      "text": "I genuinely cannot figure out how to invite a teammate. There's an Add Member button on the team page but it just opens an empty modal with no fields. Probably a bug?",
+      "source": "intercom"
+    },
+    {
+      "id": "fb_006",
+      "text": "Honestly the Pro tier feels overpriced for what you get. $99/mo and we still can't get SSO without bumping to Enterprise. Every other tool we use throws SSO in at the Pro level now.",
+      "source": "churn_survey"
+    },
+    {
+      "id": "fb_007",
+      "text": "Project list view is super slow once you have more than ~50 projects. Filtering is laggy, sorting freezes for 2-3 seconds. We have 180 projects and it's becoming unworkable.",
+      "source": "support_email"
+    },
+    {
+      "id": "fb_008",
+      "text": "The signup flow is great — clean, fast, and I was creating my first project within a minute. Would recommend to other founders.",
+      "source": "twitter"
+    },
+    {
+      "id": "fb_009",
+      "text": "Tried to set up SAML SSO for our team. The docs say it's available on Enterprise only, but the pricing page shows it as a Pro feature. Which is it? Spent 40 minutes going back and forth with sales.",
+      "source": "support_email"
+    },
+    {
+      "id": "fb_010",
+      "text": "First-run experience is overwhelming. There are 12 menu items in the left nav before I've even created anything. A guided tour or empty-state hints would help a lot.",
+      "source": "in_app_survey"
+    },
+    {
+      "id": "fb_011",
+      "text": "Reports page takes forever to generate anything beyond the last 7 days. We tried pulling a 90-day report and it just spun for 4 minutes before timing out.",
+      "source": "support_email"
+    },
+    {
+      "id": "fb_012",
+      "text": "The new keyboard shortcuts are fantastic, especially cmd+k for the command palette. Massive productivity boost. Please add one for switching workspaces too.",
+      "source": "twitter"
+    }
+  ]
+}

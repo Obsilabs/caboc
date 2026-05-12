@@ -1,0 +1,7 @@
+{
+  "name": "@caboc/example-content-moderation-text",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone CABOC routine example: score user-generated text against 8 policy buckets, propose a moderation verdict, and route borderline cases to human review.",
+  "license": "Apache-2.0"
+}

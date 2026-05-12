@@ -88,22 +88,68 @@ export const AgentFrontmatter = z
 export type AgentFrontmatter = z.infer<typeof AgentFrontmatter>;
 
 /**
- * Lockfile pinning resolved references for reproducible runs.
- * v0.1 stub — populated by future `caboc lock`.
+ * Workspace-level `routines.lock`. Mirrors `STANDARDS_DISTRIBUTION.md` §5.
+ *
+ * Records every routine installed via `caboc add`. Keyed by alias.
  */
-export const RoutineLockfile = z
+export const RoutinesLockfile = z
   .object({
     lockfile_version: z.literal(1),
-    routine_version: z.string(),
     spec_version: z.string(),
-    workflow_sha256: z.string().length(64),
-    agents: z.record(
+    routines: z.record(
       z.object({
+        source: z.string(),
+        ref: z.string(),
+        subpath: z.string().nullable().optional(),
         sha256: z.string().length(64),
         version: z.string(),
+        fetched_at: z.string(),
       }),
     ),
   })
   .strict();
 
-export type RoutineLockfile = z.infer<typeof RoutineLockfile>;
+export type RoutinesLockfile = z.infer<typeof RoutinesLockfile>;
+
+/**
+ * Alias config. Mirrors `STANDARDS_ALIASES.md` §3.
+ *
+ * Lives at workspace root in `caboc.config.json` OR under the `caboc:` key in
+ * `package.json` (the two are mutually exclusive).
+ */
+export const AliasesConfig = z
+  .object({
+    aliases: z.record(z.string()).default({}),
+    run: z
+      .object({
+        fetchOnMiss: z.boolean().default(false),
+      })
+      .partial()
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+export type AliasesConfig = z.infer<typeof AliasesConfig>;
+
+const ALIAS_ID = /^[a-z][a-z0-9-]{0,39}$/;
+
+/** Throw on invalid alias identifier shape (STANDARDS_ALIASES §4). */
+export function validateAliasId(name: string): void {
+  if (!ALIAS_ID.test(name)) {
+    throw new Error(
+      `CABOC_E_ALIAS_INVALID: '${name}' — alias must be kebab-case, start with a letter, 1-40 chars`,
+    );
+  }
+  if (
+    name.startsWith("gh:") ||
+    name.startsWith("gl:") ||
+    name.startsWith("bb:") ||
+    name.includes("github.com") ||
+    name.includes("/")
+  ) {
+    throw new Error(
+      `CABOC_E_ALIAS_INVALID: '${name}' — alias must not look like a source spec`,
+    );
+  }
+}

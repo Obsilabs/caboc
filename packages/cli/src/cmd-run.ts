@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: 2026 CABOC contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { mkdir, writeFile, readFile, stat } from "node:fs/promises";
+import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { join, resolve, relative } from "node:path";
 import { stdout, stderr, cwd } from "node:process";
 import { genRunId } from "./run-id.js";
+import { resolveRoutine, type ResolveSource } from "./resolve-routine.js";
 
-function parseArgs(args: string[]): { dir?: string; inputs?: string } {
-  const out: { dir?: string; inputs?: string } = {};
+function parseArgs(args: string[]): { target?: string; inputs?: string } {
+  const out: { target?: string; inputs?: string } = {};
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
     if (a === "--inputs" || a === "-i") {
@@ -15,11 +16,24 @@ function parseArgs(args: string[]): { dir?: string; inputs?: string } {
       if (next !== undefined) {
         out.inputs = next;
       }
-    } else if (a && !a.startsWith("-") && !out.dir) {
-      out.dir = a;
+    } else if (a && !a.startsWith("-") && !out.target) {
+      out.target = a;
     }
   }
   return out;
+}
+
+function describeVia(via: ResolveSource): string {
+  switch (via.source) {
+    case "path":
+      return "path";
+    case "lockfile":
+      return `lockfile['${via.alias}']`;
+    case "alias":
+      return `alias['${via.alias}' → '${via.target}']`;
+    case "bare-slug":
+      return `${via.under}/`;
+  }
 }
 
 const PROMPT_HEADER = `# CABOC Runtime Instructions
@@ -53,9 +67,9 @@ function relSafe(p: string): string {
 
 export async function run(args: string[]): Promise<number> {
   const parsed = parseArgs(args);
-  if (!parsed.dir) {
-    stderr.write("caboc run: missing <routine-dir>\n");
-    stderr.write("usage: caboc run <routine-dir> --inputs <inputs.json>\n");
+  if (!parsed.target) {
+    stderr.write("caboc run: missing <alias|routine-dir>\n");
+    stderr.write("usage: caboc run <alias|routine-dir> --inputs <inputs.json>\n");
     return 1;
   }
   if (!parsed.inputs) {
@@ -63,16 +77,14 @@ export async function run(args: string[]): Promise<number> {
     return 1;
   }
 
-  const routineDir = resolve(cwd(), parsed.dir);
-  const inputsPath = resolve(cwd(), parsed.inputs);
-
-  try {
-    const s = await stat(routineDir);
-    if (!s.isDirectory()) throw new Error("not a directory");
-  } catch {
-    stderr.write(`caboc run: routine dir not found: ${routineDir}\n`);
+  const workspace = cwd();
+  const resolution = await resolveRoutine(parsed.target, workspace);
+  if (resolution.kind === "error") {
+    stderr.write(`caboc run: ${resolution.code}: ${resolution.message}\n`);
     return 1;
   }
+  const routineDir = resolution.dir;
+  const inputsPath = resolve(workspace, parsed.inputs);
 
   // Read the supplied inputs file and validate it parses as JSON.
   let inputsRaw: string;
@@ -117,6 +129,9 @@ export async function run(args: string[]): Promise<number> {
   );
 
   // Status info goes to stderr so the prompt on stdout stays clean for piping.
-  stderr.write(`\ncaboc: prepared run ${runId} at ${relSafe(runDir)}\n`);
+  stderr.write(
+    `\ncaboc: resolved '${parsed.target}' via ${describeVia(resolution.via)} → ${relSafe(routineDir)}\n`,
+  );
+  stderr.write(`caboc: prepared run ${runId} at ${relSafe(runDir)}\n`);
   return 0;
 }

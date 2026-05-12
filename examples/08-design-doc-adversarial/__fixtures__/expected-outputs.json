@@ -1,0 +1,68 @@
+{
+  "critiques": [
+    {
+      "section_ref": "## Revocation",
+      "severity": "blocker",
+      "concern": "Rotating the HS256 shared secret to invalidate one user's session forces a global sign-out of every user across every service. This is documented as an anti-pattern for JWT auth and is strictly worse than the current cookie flow, where Redis can drop a single session. The doc treats this as an acceptable v1 tradeoff but does not state the revocation SLO the business actually needs (password change, account takeover, employee offboarding).",
+      "alternative": "Keep JWTs short-lived (5-15 minutes) and pair them with a refresh-token flow where the refresh token is the only thing checked against a small server-side allowlist. This restores per-user revocation in <= refresh-window time without re-introducing a per-request Redis lookup."
+    },
+    {
+      "section_ref": "### Token format (HS256 + shared secret)",
+      "severity": "major",
+      "concern": "HS256 with a single shared secret distributed to every backend service means every service can also mint tokens, not just verify them. Any service compromise becomes a full auth-system compromise. The doc dismisses RS256 as 'simpler' without weighing this blast-radius cost.",
+      "alternative": "Use RS256 (or EdDSA) with one signing service that holds the private key and ships only the public key to verifiers. Verifier services cannot mint; the blast radius of a verifier compromise is bounded."
+    },
+    {
+      "section_ref": "### Issuance (localStorage)",
+      "severity": "major",
+      "concern": "Storing the JWT in browser localStorage exposes it to any XSS on any page in the app. The current httpOnly session cookie is not reachable from JS. The doc treats the move to localStorage as incidental — it is the most consequential security regression in the proposal.",
+      "alternative": "Keep the JWT in an httpOnly, Secure, SameSite=Lax cookie for the web client. Mobile can continue to use Authorization headers; the two clients do not need to share a storage strategy."
+    },
+    {
+      "section_ref": "## Non-goals (refresh tokens)",
+      "severity": "major",
+      "concern": "Deferring refresh tokens to v2 is what forces the 7-day `exp` and the global-rotation revocation story. The two decisions are coupled — declaring refresh tokens out of scope is not a free non-goal, it is what makes the rest of the design untenable.",
+      "alternative": "Bring refresh tokens into v1 scope. The incremental complexity is modest (one extra endpoint and one allowlist table) and it removes both the long-exp tradeoff and the rotation-as-revocation tradeoff in one move."
+    },
+    {
+      "section_ref": "## Rollout (10/50/100 on consecutive days)",
+      "severity": "minor",
+      "concern": "A three-day ramp on an auth migration leaves very little time to catch incidents that surface only at scale (e.g. clock skew, secret-distribution gaps, mobile-client edge cases). The cookie path is also deleted only two weeks after 100%, which is fast for an auth-system rollback window.",
+      "alternative": "Stretch the ramp over at least one full business week with a hold at 10% for 48 hours, and keep the cookie path behind the flag for one release cycle (4-6 weeks) so rollback does not require a deploy."
+    },
+    {
+      "section_ref": "### Verification",
+      "severity": "minor",
+      "concern": "Verification is described as a local check with no mention of clock skew tolerance, allowed signing-algorithm pinning (`alg: none` confusion attack), or `iss`/`aud` validation. These are the standard JWT footguns and the doc is silent on them.",
+      "alternative": "Specify a verification library or a verifier helper used by every service, pin `alg` explicitly, set `aud` per audience (web vs. mobile), and document a clock-skew tolerance (e.g. 30s)."
+    }
+  ],
+  "blind_spots": [
+    {
+      "spot": "The doc does not specify how on-call distinguishes a JWT signature failure from a clock-skew failure from an expired-token failure during incident triage — all three return 401 to the client today.",
+      "why_missed": "Author bias — the author has been thinking about the happy path of issuance and verification, not about what the SRE team will see at 3am when something is wrong."
+    },
+    {
+      "spot": "There is no plan for revoking access on password change, account takeover, or employee offboarding within a bounded time window. Rotating the shared secret is named as the lever but its real cost (global sign-out) is not acknowledged.",
+      "why_missed": "Scope creep avoidance — the author moved revocation out of v1 because it is hard, without noticing that the v1 design depends on revocation being solved."
+    },
+    {
+      "spot": "Mobile clients are mentioned as a driver but no migration story exists for already-signed-in mobile users on the day the flag flips: do existing cookie sessions force a re-login, do they continue to work via a compatibility shim, or is mobile flipped on day 0 of the feature?",
+      "why_missed": "Assumed handled elsewhere — the author appears to assume the mobile team owns the client-side migration, but the server-side contract during the cutover is not specified."
+    },
+    {
+      "spot": "Observability of the new auth path is not defined: no metrics named (verification latency, 401 rate by reason, token age at request time), no alert thresholds, no traces. Today's Redis lookup at least produces a clear span.",
+      "why_missed": "New domain — the author has not previously owned an auth-system rollout and is underestimating how much of the on-call signal the current cookie/Redis path provides for free."
+    },
+    {
+      "spot": "Audit logging requirements are not mentioned. The current session store is a natural audit source ('this session_id was active at this time'). A self-contained JWT system has no equivalent unless logging is designed in.",
+      "why_missed": "Assumed handled elsewhere — likely thought of as a compliance / security-team concern, but the design has to surface the events for them to log."
+    },
+    {
+      "spot": "Cost of the change is not addressed. Removing the Redis lookup is named as a benefit, but the doc does not estimate the saved infra cost vs. the new operational cost (key rotation tooling, refresh-token storage if added, monitoring) — making it impossible to weigh the migration against alternative latency wins.",
+      "why_missed": "Author bias — author led with the latency motivation and did not return to ask whether a cheaper change (e.g. local Redis replica) would have captured most of the latency win without the auth-system rewrite."
+    }
+  ],
+  "recommend": "reject",
+  "rationale_md": "**Recommendation: reject**\n\nThe v1 design is structurally incompatible with the business's likely revocation needs. Rotating the HS256 shared secret to invalidate one user's session is a global sign-out — that is documented as a JWT anti-pattern and is a regression versus the cookie+Redis system it replaces. The same root cause (deferring refresh tokens to v2) forces a 7-day token lifetime, which compounds the revocation gap. On top of that, the proposed `localStorage` storage on web is a meaningful security regression against the current httpOnly cookie, and HS256 with a globally-distributed secret means every backend service can mint, not just verify, expanding the blast radius of any single service compromise.\n\n**Top critiques to address before next revision:**\n- `## Revocation` — secret rotation is not a revocation strategy; pair short-lived JWTs with a server-side refresh-token allowlist (blocker)\n- `### Token format (HS256 + shared secret)` — move to RS256/EdDSA with one signer and many verifiers (major)\n- `### Issuance (localStorage)` — keep the web token in an httpOnly cookie; mobile can use Authorization headers (major)\n- `## Non-goals (refresh tokens)` — bring refresh tokens into v1; they are load-bearing for the rest of the design (major)\n- `## Rollout` — extend the ramp and keep the cookie path behind the flag for at least one release cycle (minor)\n\n**Blind spots worth investigating:**\n- Bounded-time revocation for password change / takeover / offboarding — name the SLO and design to it.\n- On-call triage for 401s — distinguish signature failure, clock skew, and expired-token cases in logs.\n- Mobile cutover contract — what happens to already-signed-in mobile users on flag-flip day.\n- Observability — name the metrics, the alert thresholds, and the audit events to emit.\n- Cost — is there a cheaper latency win (e.g. local Redis replica) that captures most of the benefit?\n\n**Notes on what the doc gets right:**\n- The feature-flag-gated ramp shape is the right rollout primitive; the issue is the speed, not the mechanism.\n- Separating issuance and verification cleanly between `/login` and per-service middleware is the right boundary; switching to RS256 keeps that boundary intact.\n"
+}

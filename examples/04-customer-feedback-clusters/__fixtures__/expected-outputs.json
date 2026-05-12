@@ -1,0 +1,29 @@
+{
+  "clusters": [
+    {
+      "theme": "Dashboard and reports performance",
+      "sentiment": "negative",
+      "ids": ["fb_003", "fb_007", "fb_011"],
+      "representative_quote": "The dashboard takes 8 seconds to paint after login and that's on a fast connection. It's been like this for two weeks. Please fix."
+    },
+    {
+      "theme": "Onboarding clarity and first-run friction",
+      "sentiment": "negative",
+      "ids": ["fb_002", "fb_005", "fb_010"],
+      "representative_quote": "First-run experience is overwhelming. There are 12 menu items in the left nav before I've even created anything. A guided tour or empty-state hints would help a lot."
+    },
+    {
+      "theme": "Pricing tier value and SSO positioning",
+      "sentiment": "negative",
+      "ids": ["fb_001", "fb_006", "fb_009"],
+      "representative_quote": "Honestly the Pro tier feels overpriced for what you get. $99/mo and we still can't get SSO without bumping to Enterprise."
+    },
+    {
+      "theme": "UI polish wins (dark mode, shortcuts, signup)",
+      "sentiment": "positive",
+      "ids": ["fb_004", "fb_008", "fb_012"],
+      "representative_quote": "The new keyboard shortcuts are fantastic, especially cmd+k for the command palette. Massive productivity boost."
+    }
+  ],
+  "top_themes_summary_md": "## Top themes\n\n### Dashboard and reports performance\n\nSentiment: negative. Three separate reports converge on the same complaint — login-time dashboard paint, project-list filtering on accounts above ~50 projects, and report generation past a 7-day window. This is the largest cluster and the one most likely to drive churn on accounts that have grown into real usage.\n\n> The dashboard takes 8 seconds to paint after login and that's on a fast connection. It's been like this for two weeks. Please fix.\n\n### Onboarding clarity and first-run friction\n\nSentiment: negative. New users hit a dense left nav, a wizard that double-asks team size and forces Slack setup, and an Add Member modal that opens empty. The pain compounds inside the first session, which is where activation lives.\n\n> First-run experience is overwhelming. There are 12 menu items in the left nav before I've even created anything. A guided tour or empty-state hints would help a lot.\n\n### Pricing tier value and SSO positioning\n\nSentiment: negative. Customers cannot reconcile the pricing page with the docs on where SSO sits, and the Pro tier reads as expensive relative to peer tools that bundle SSO. One report ties this directly to churn consideration.\n\n> Honestly the Pro tier feels overpriced for what you get. $99/mo and we still can't get SSO without bumping to Enterprise."
+}

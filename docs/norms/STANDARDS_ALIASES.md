@@ -75,15 +75,17 @@ errors with `CABOC_E_ALIAS_CONFIG_DUPLICATED` if both exist.
 
 ## 4. Alias identifier shape
 
-- Kebab-case.
-- Starts with an ASCII letter.
+- Kebab-case (`a-z`, `0-9`, `-`).
+- Starts with a letter OR digit (digits allowed so ordinal-prefix
+  slugs like `02-changelog-from-commits` can be aliases too).
 - 1–40 chars.
 - No path separators, no `@`, no `#`, no `:`.
 - Reserved: identifiers that look like a source spec (`gh:...`,
   `github.com/...`) are rejected at config load.
 
-Valid: `commit-msg`, `release-notes`, `pr-review`.
-Invalid: `Commit-Msg` (case), `pr_review` (underscore), `gh:foo`.
+Valid: `commit-msg`, `release-notes`, `pr-review`, `02-changelog-from-commits`.
+Invalid: `Commit-Msg` (case), `pr_review` (underscore), `gh:foo`,
+`-leading-dash`.
 
 ## 5. Version pinning inside an alias target
 

@@ -132,13 +132,13 @@ export const AliasesConfig = z
 
 export type AliasesConfig = z.infer<typeof AliasesConfig>;
 
-const ALIAS_ID = /^[a-z][a-z0-9-]{0,39}$/;
+const ALIAS_ID = /^[a-z0-9][a-z0-9-]{0,39}$/;
 
 /** Throw on invalid alias identifier shape (STANDARDS_ALIASES §4). */
 export function validateAliasId(name: string): void {
   if (!ALIAS_ID.test(name)) {
     throw new Error(
-      `CABOC_E_ALIAS_INVALID: '${name}' — alias must be kebab-case, start with a letter, 1-40 chars`,
+      `CABOC_E_ALIAS_INVALID: '${name}' — alias must be kebab-case (a-z, 0-9, -), 1-40 chars, start with a letter or digit`,
     );
   }
   if (

@@ -1,0 +1,152 @@
+{
+  "decisions": [
+    {
+      "topic": "Pricing experiment launch",
+      "decision": "Launch pricing experiment Monday 2026-05-18 at the 5% cohort.",
+      "made_by": "Ana",
+      "confidence": 0.98,
+      "quote": "Decision: pricing experiment launches Monday 2026-05-18 at 5 percent."
+    },
+    {
+      "topic": "Checkout regression fix",
+      "decision": "Ship the checkout regression fix this sprint as P0.",
+      "made_by": "Ana",
+      "confidence": 0.95,
+      "quote": "First up, the checkout regression — we're shipping the fix this sprint, P0."
+    },
+    {
+      "topic": "Android 14 crash strategy",
+      "decision": "Ship the workaround in Sprint 42; land the proper fix in Sprint 43.",
+      "made_by": "Ana",
+      "confidence": 0.93,
+      "quote": "Confirmed, workaround ships this sprint, proper fix Sprint 43. Dev owns both."
+    },
+    {
+      "topic": "SDK 4.2 bump",
+      "decision": "Bump SDK to 4.2 only if Ben scopes the blast radius first.",
+      "made_by": "Ana",
+      "confidence": 0.82,
+      "quote": "Fine, but only if it doesn't widen the blast radius. Ben, scope it first."
+    },
+    {
+      "topic": "v1 webhook deprecation venue",
+      "decision": "Move the v1 webhook deprecation discussion to an async thread in #platform.",
+      "made_by": "Ana",
+      "confidence": 0.78,
+      "quote": "Let's punt that to async. Open a thread in #platform and we can decide there."
+    },
+    {
+      "topic": "June on-call rotation",
+      "decision": "June on-call: Ben week 1, Cara week 2, Dev week 3, Ana week 4.",
+      "made_by": "Ana",
+      "confidence": 0.9,
+      "quote": "Ben, you're up for week 1, Cara week 2, Dev week 3, me week 4."
+    }
+  ],
+  "actions": [
+    {
+      "owner": "Ben",
+      "action": "Open a PR for the checkout regression fix.",
+      "due": "2026-05-13",
+      "priority": "P0",
+      "quote": "I'll own the patch and have a PR up by Wednesday."
+    },
+    {
+      "owner": "Cara",
+      "action": "Email Maya in legal to escalate the schema sign-off, CC Ana.",
+      "due": "2026-05-12",
+      "priority": "P0",
+      "quote": "Yes, I'll email her right after this and CC you."
+    },
+    {
+      "owner": "Dev",
+      "action": "Merge the Android 14 crash workaround PR after Ben's review.",
+      "due": "2026-05-12",
+      "priority": "P0",
+      "quote": "Workaround PR is already up, I'll merge after Ben's review."
+    },
+    {
+      "owner": "Ben",
+      "action": "Review the Android 14 crash workaround PR.",
+      "due": "2026-05-12",
+      "priority": "P0",
+      "quote": "I'll review the workaround today."
+    },
+    {
+      "owner": "Ben",
+      "action": "Post an SDK 4.2 scoping note in the channel before opening the PR.",
+      "due": "2026-05-13",
+      "priority": "P1",
+      "quote": "I'll post a scoping note in the channel before Wednesday."
+    },
+    {
+      "owner": "Cara",
+      "action": "Review Ben's checkout regression PR on Thursday morning.",
+      "due": "2026-05-14",
+      "priority": "P1",
+      "quote": "I can review it Thursday morning."
+    },
+    {
+      "owner": "Cara",
+      "action": "Send invites for a 60-minute Q3 staffing review session next week.",
+      "due": "2026-05-13",
+      "priority": "P1",
+      "quote": "Yes, I'll send invites tomorrow for a 60-min session next week."
+    },
+    {
+      "owner": "Dev",
+      "action": "Open an async thread in #platform to decide v1 webhook deprecation.",
+      "due": "2026-05-12",
+      "priority": "P2",
+      "quote": "Will do, I'll post the thread this afternoon."
+    }
+  ],
+  "blockers": [
+    {
+      "what": "Legal sign-off pending on the new analytics schema.",
+      "blocking_what": "Analytics rollout migration.",
+      "waiting_on": "Maya (legal)",
+      "severity": "critical",
+      "quote": "That's blocking the analytics rollout entirely."
+    },
+    {
+      "what": "Acme API contract not yet returned.",
+      "blocking_what": "Vendor onboarding flow and partner pilot.",
+      "waiting_on": "Acme",
+      "severity": "high",
+      "quote": "They said two weeks, so end of May at the earliest. It's blocking the partner pilot."
+    },
+    {
+      "what": "SDK 4.2 bump pending blast-radius scoping.",
+      "blocking_what": "Bundling SDK upgrade with the checkout regression fix.",
+      "waiting_on": "Ben",
+      "severity": "medium",
+      "quote": "Fine, but only if it doesn't widen the blast radius. Ben, scope it first."
+    }
+  ],
+  "followups": [
+    {
+      "topic": "Q3 staffing review",
+      "who": "Cara",
+      "when": "2026-05-21",
+      "channel": "sync_meeting",
+      "quote": "Agreed, let's schedule a Q3 staffing review. Cara, you set it up for after May 20?"
+    },
+    {
+      "topic": "Acme vendor onboarding status check",
+      "who": "Ana",
+      "when": "next week's sync",
+      "channel": "sync_meeting",
+      "quote": "Mark it high severity. Let's revisit in next week's sync."
+    },
+    {
+      "topic": "v1 webhook endpoint deprecation",
+      "who": "Dev",
+      "when": "undecided",
+      "channel": "slack_thread",
+      "quote": "Open a thread in #platform and we can decide there."
+    }
+  ],
+  "summary_md": "# Sprint 42 planning — 2026-05-12\n\nParticipants: Ana, Ben, Cara, Dev\n\n## Decisions\n- Pricing experiment launch: Launch pricing experiment Monday 2026-05-18 at the 5% cohort. (Ana)\n- Checkout regression fix: Ship the checkout regression fix this sprint as P0. (Ana)\n- Android 14 crash strategy: Ship the workaround in Sprint 42; land the proper fix in Sprint 43. (Ana)\n- June on-call rotation: June on-call: Ben week 1, Cara week 2, Dev week 3, Ana week 4. (Ana)\n- SDK 4.2 bump: Bump SDK to 4.2 only if Ben scopes the blast radius first. (Ana)\n- v1 webhook deprecation venue: Move the v1 webhook deprecation discussion to an async thread in #platform. (Ana)\n\n## Actions\n- [P0] Ben — Open a PR for the checkout regression fix. (due 2026-05-13)\n- [P0] Cara — Email Maya in legal to escalate the schema sign-off, CC Ana. (due 2026-05-12)\n- [P0] Dev — Merge the Android 14 crash workaround PR after Ben's review. (due 2026-05-12)\n- [P0] Ben — Review the Android 14 crash workaround PR. (due 2026-05-12)\n- [P1] Ben — Post an SDK 4.2 scoping note in the channel before opening the PR. (due 2026-05-13)\n- [P1] Cara — Review Ben's checkout regression PR on Thursday morning. (due 2026-05-14)\n- [P1] Cara — Send invites for a 60-minute Q3 staffing review session next week. (due 2026-05-13)\n- [P2] Dev — Open an async thread in #platform to decide v1 webhook deprecation. (due 2026-05-12)\n\n## Blockers\n- [critical] Legal sign-off pending on the new analytics schema. blocks Analytics rollout migration. (waiting on Maya (legal))\n- [high] Acme API contract not yet returned. blocks Vendor onboarding flow and partner pilot. (waiting on Acme)\n- [medium] SDK 4.2 bump pending blast-radius scoping. blocks Bundling SDK upgrade with the checkout regression fix. (waiting on Ben)\n\n## Followups\n- Q3 staffing review — Cara, 2026-05-21 via sync_meeting\n- Acme vendor onboarding status check — Ana, next week's sync via sync_meeting\n- v1 webhook endpoint deprecation — Dev, undecided via slack_thread\n",
+  "attention_score": 1.0
+}

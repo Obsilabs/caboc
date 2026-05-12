@@ -1,0 +1,8 @@
+{
+  "severity": "high",
+  "component": "payments-checkout",
+  "reproducible": true,
+  "next_action": "assign_engineering",
+  "draft_reply_md": "Hi Lena,\n\nThanks for the detailed write-up and the clean repro steps — that's enough for us to act on directly. We've logged this against the hosted checkout flow on the payments side: the symptom you're describing (a `PSP-TIMEOUT (code 504)` on the first 3DS attempt followed by a successful second authorisation that still settles the first one) points at the retry path not cancelling the pending authorisation when the 3DS modal lapses.\n\nWe're routing this to engineering now and treating it as a same-business-day acknowledgement on the Pro plan. We'll come back to you with either a fix ETA or a temporary mitigation before end of day. If it's easy, please send the request IDs for one of the duplicated charges — we'd rather match against your traces than guess.\n\nBest,\nSupport",
+  "confidence": 0.86
+}

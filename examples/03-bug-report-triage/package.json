@@ -1,0 +1,7 @@
+{
+  "name": "@caboc/example-bug-report-triage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone CABOC routine example: triage an inbound bug-report ticket and propose the next concrete action.",
+  "license": "Apache-2.0"
+}

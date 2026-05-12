@@ -17,6 +17,8 @@ a PR.
 | `STANDARDS_DOCS.md`               | README discipline, link checks, ATX-only headings.            |
 | `STANDARDS_SECURITY.md`           | Coord-disclosure mirror, sandbox guidance for routines.       |
 | `STANDARDS_ROUTINES.md`           | CABOC-specific: routine + agent frontmatter contracts.        |
+| `STANDARDS_DISTRIBUTION.md`       | `caboc add` source forms, content hashing, lockfile, TOFU.    |
+| `STANDARDS_ALIASES.md`            | `caboc run` alias config + resolution precedence.             |
 | `STANDARDS_RELEASES.md`           | Changesets, semver, CHANGELOG per package.                    |
 
 ## Status

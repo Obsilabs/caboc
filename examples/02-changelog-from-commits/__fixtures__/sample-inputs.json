@@ -1,0 +1,16 @@
+{
+  "commits": [
+    "feat(api): add cursor-based pagination to list endpoints\n\nClients can now pass `?cursor=...` instead of `?page=N` to iterate large\ncollections without skipping items when records shift between requests.",
+    "feat(cli): support `--json` flag on `caboc inspect`\n\nMakes the inspect command machine-readable for CI pipelines.",
+    "fix(parser): handle empty token stream without throwing\n\nPreviously `parse([])` threw `TypeError: Cannot read 'kind' of undefined`. It now returns an empty AST.",
+    "fix(http): retry idempotent requests on 503 instead of failing fast",
+    "perf(loader): cache resolved module specifiers across calls",
+    "docs(readme): document the new pagination cursor format",
+    "refactor(core): split `Runtime` into `Scheduler` and `Executor`",
+    "chore(deps): bump typescript from 5.4.2 to 5.4.5",
+    "test(parser): add fuzz cases for malformed inputs",
+    "build(ci): cache pnpm store between jobs"
+  ],
+  "since_version": "1.4.0",
+  "audience": "users"
+}

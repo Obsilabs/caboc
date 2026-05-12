@@ -1,7 +1,0 @@
-{
-  "name": "@caboc/example-changelog-from-commits",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Standalone CABOC routine example: generate a user-facing CHANGELOG entry from a list of Conventional Commits.",
-  "license": "Apache-2.0"
-}

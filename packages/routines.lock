@@ -1,0 +1,14 @@
+{
+  "lockfile_version": 1,
+  "routines": {
+    "02-changelog-from-commits": {
+      "fetched_at": "2026-05-12T01:36:10.865Z",
+      "ref": "15abc1b36e2c28967d33ba30515c48216f7a24d2",
+      "sha256": "4799780474628102d9a2af46971cea27dac6021751a9dd0b11498b472021dc51",
+      "source": "github.com/Obsilabs/caboc",
+      "subpath": "examples/02-changelog-from-commits",
+      "version": "0.1.0"
+    }
+  },
+  "spec_version": "caboc-llm/0.1.0"
+}

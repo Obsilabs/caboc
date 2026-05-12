@@ -55,6 +55,9 @@ export const WorkflowFrontmatter = z
     memory: z.record(z.unknown()).optional(),
     trust: z.record(z.unknown()).optional(),
     invariants: z.array(z.unknown()).optional(),
+    // v0.2 additions
+    hitl_schemas: z.record(z.unknown()).optional(),
+    provider_roles: z.record(z.unknown()).optional(),
   })
   .strict();
 
@@ -82,6 +85,12 @@ export const AgentFrontmatter = z
       .partial()
       .strict()
       .optional(),
+    // v0.2 additions
+    provider_role: z.string().min(1).optional(),
+    scratch_dirs: z
+      .array(z.union([z.string(), z.record(z.unknown())]))
+      .optional(),
+    schema_ref: z.string().optional(),
   })
   .strict();
 

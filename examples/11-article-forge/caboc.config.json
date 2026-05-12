@@ -1,0 +1,67 @@
+{
+  "aliases": {
+    "article-forge": "./"
+  },
+  "roles": {
+    "forge-scout": {
+      "capability": "reasoning",
+      "tier": "fast",
+      "constraints": {
+        "supports_structured_output": true,
+        "max_latency_ms": 30000
+      }
+    },
+    "forge-decompose": {
+      "capability": "structured_extraction",
+      "tier": "balanced",
+      "constraints": {
+        "supports_structured_output": true
+      }
+    },
+    "forge-planner": {
+      "capability": "reasoning",
+      "tier": "balanced",
+      "constraints": {
+        "supports_structured_output": true
+      }
+    },
+    "forge-collector": {
+      "capability": "reasoning",
+      "tier": "fast",
+      "constraints": {
+        "max_latency_ms": 45000,
+        "supports_structured_output": true
+      }
+    },
+    "forge-writer": {
+      "capability": "reasoning",
+      "tier": "deep",
+      "constraints": {
+        "min_context_tokens": 200000,
+        "supports_structured_output": true
+      }
+    },
+    "forge-reviewer": {
+      "capability": "reasoning",
+      "tier": "balanced",
+      "constraints": {
+        "min_context_tokens": 100000,
+        "supports_structured_output": true
+      }
+    },
+    "forge-gap-patcher": {
+      "capability": "structured_extraction",
+      "tier": "fast",
+      "constraints": {
+        "supports_structured_output": true
+      }
+    },
+    "forge-finalizer": {
+      "capability": "reasoning",
+      "tier": "fast",
+      "constraints": {
+        "supports_structured_output": true
+      }
+    }
+  }
+}

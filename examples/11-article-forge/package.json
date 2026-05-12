@@ -1,0 +1,7 @@
+{
+  "name": "@caboc/example-article-forge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone CABOC routine example: research-driven article and dossier generation pipeline with parallel research fanout, a bounded gap-patching feedback loop, an HITL editorial checkpoint, and file-array chapter outputs. Demonstrates the full caboc-llm/0.2.0 grammar surface.",
+  "license": "Apache-2.0"
+}

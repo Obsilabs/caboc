@@ -1,0 +1,51 @@
+{
+  "index_md": {
+    "path": "outputs/index.md",
+    "content_type": "text/markdown",
+    "size_bytes": 2418,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "chapters": [
+    {
+      "path": "outputs/chapters/01-intro-durable-ai.md",
+      "title": "Pourquoi des exécutions AI durables ?",
+      "size_bytes": 4612,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "outputs/chapters/02-state-management.md",
+      "title": "Persistance d'état : journaux, snapshots, idempotence",
+      "size_bytes": 5894,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "outputs/chapters/03-failure-modes.md",
+      "title": "Modes de défaillance et reprise",
+      "size_bytes": 4978,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "outputs/chapters/04-runtime-patterns.md",
+      "title": "Patterns runtime : Temporal, Restate, et le modèle CABOC",
+      "size_bytes": 6131,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "outputs/chapters/05-conclusion.md",
+      "title": "Ce qu'il faut retenir pour vos systèmes",
+      "size_bytes": 3245,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "metadata": {
+    "subject": "Architecture des systèmes durables d'exécution AI",
+    "style": "pédagogique",
+    "depth": "article",
+    "cells_collected": 8,
+    "gaps_patched": 0,
+    "generated_at": "2026-05-12T09:00:00Z"
+  },
+  "review_report": "## Structural review\n\n**Fil-conducteur fidelity.** Chaque chapitre fait progresser le fil rouge — pourquoi un runtime durable est nécessaire, comment l'implémenter, et où CABOC se positionne — sans détour. Le passage du chapitre 3 au chapitre 4 est solide : on quitte les modes de défaillance abstraits pour entrer dans les patterns runtime concrets.\n\n**Coverage.** Les 5 questions-clés annoncées dans le plan éditorial sont toutes traitées. Quelques angles secondaires (observabilité fine, coûts d'infrastructure) sont effleurés mais pas centraux ; ce choix est cohérent avec la profondeur `article`.\n\n**Style & redundancy.** Style `pédagogique` tenu : les définitions techniques sont introduites en plain language avant d'être nommées formellement. Une légère redondance entre les chapitres 2 et 4 sur l'idempotence a été lissée par un transition revue (chapitre 4 marqué `revised`). Ship.",
+  "loops_used": 1,
+  "chapter_count": 5
+}

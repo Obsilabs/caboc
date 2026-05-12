@@ -1,19 +1,19 @@
 {
   "name": "caboc-runtime",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Execute CABOC routine directories as an LLM-driven pipeline.",
   "license": "Apache-2.0",
   "entry": "SKILL.md",
-  "spec_version": "caboc-llm/0.1.0",
+  "spec_version": "caboc-llm/0.2.0",
   "categories": ["workflow", "orchestration", "llm-runtime"],
-  "tags": ["caboc", "workflow", "agents", "instruction-directory"],
+  "tags": ["caboc", "workflow", "agents", "tools", "instruction-directory"],
   "install": {
     "registry": "skills.sh",
     "command": "npx skills add caboc-runtime",
-    "url": "https://github.com/caboc-project/caboc/tree/main/skills/caboc-runtime"
+    "url": "https://github.com/Obsilabs/caboc/tree/main/skills/caboc-runtime"
   },
-  "homepage": "https://github.com/caboc-project/caboc",
-  "repository": "https://github.com/caboc-project/caboc.git",
+  "homepage": "https://github.com/Obsilabs/caboc",
+  "repository": "https://github.com/Obsilabs/caboc.git",
   "author": "CABOC contributors",
   "compat": {
     "host": ["claude-code", "codex-cli", "cursor", "gemini-cli"],

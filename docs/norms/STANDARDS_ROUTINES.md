@@ -1,7 +1,20 @@
 # STANDARDS_ROUTINES — Routine + agent contracts
 
-> Status: draft v0.1
+> Status: draft v0.2 (updates v0.1 to reference the v0.2 grammar +
+> companion norms)
 > Scope: every routine directory under `routines/` or `examples/`.
+
+For the full body grammar see `STANDARDS_GRAMMAR.md`. For specific
+constructs:
+
+- `USE TOOL` — `STANDARDS_TOOLS.md`
+- `LOOP` / `FOR_EACH` / `PARALLEL CONCURRENCY` / `BREAK` / `SET` — `STANDARDS_LOOPS.md`
+- `STEP HITL` / `PROMPT TO` / `AWAIT FROM human` — `STANDARDS_HITL.md`
+- `INVOKE WORKFLOW` — `STANDARDS_SUBROUTINES.md`
+- File-typed outputs + `scratch_dirs:` + `caboc bundle` — `STANDARDS_OUTPUTS.md`
+- `provider_role:` on agents + `caboc.config.json.roles` — `STANDARDS_PROVIDER_ROLES.md`
+- `caboc add` + `routines.lock` — `STANDARDS_DISTRIBUTION.md`
+- `caboc run <alias>` resolution — `STANDARDS_ALIASES.md`
 
 ## 1. Routine layout
 

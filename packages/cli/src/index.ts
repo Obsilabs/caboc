@@ -13,7 +13,10 @@ Usage:
   caboc list                                   List installed routines and aliases.
   caboc remove <alias>                         Uninstall a routine.
   caboc run <alias|routine-dir> --inputs <f>   Print the runtime prompt for an LLM.
+  caboc dry-run <alias|routine-dir>            Static analysis: count steps, agents, tools, fanouts.
   caboc inspect <run-dir>                      Pretty-print a past run.
+  caboc bundle <run-dir>                       Deterministic tar.gz of a run directory.
+  caboc replay <run-dir>                       Re-print the prompt to replay a past run.
 
 Flags:
   -h, --help        Show this help.
@@ -30,8 +33,7 @@ async function main(): Promise<number> {
   }
 
   if (first === "-v" || first === "--version" || first === "version") {
-    // Kept in sync with package.json manually.
-    stdout.write("0.2.0\n");
+    stdout.write("0.3.0\n");
     return 0;
   }
 
@@ -66,6 +68,19 @@ async function main(): Promise<number> {
     }
     case "inspect": {
       const mod = await import("./cmd-inspect.js");
+      return mod.run(rest);
+    }
+    case "bundle": {
+      const mod = await import("./cmd-bundle.js");
+      return mod.run(rest);
+    }
+    case "replay": {
+      const mod = await import("./cmd-replay.js");
+      return mod.run(rest);
+    }
+    case "dry-run":
+    case "dryrun": {
+      const mod = await import("./cmd-dry-run.js");
       return mod.run(rest);
     }
     default:

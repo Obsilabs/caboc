@@ -1,270 +1,214 @@
 ---
 name: caboc-runtime
-version: 0.1.0
+version: 0.2.0
 description: |
   Execute a CABOC routine directory as a directly-driven LLM pipeline.
   Read WORKFLOW.md, dispatch USE AGENT calls as Task subagent spawns,
-  persist NDJSON transcript per run.
+  dispatch USE TOOL calls as typed library invocations, handle loops
+  (LOOP / FOR_EACH / PARALLEL CONCURRENCY=N), human-in-the-loop pauses,
+  subroutine invocations, file-typed outputs, and a NDJSON transcript
+  per run.
 license: Apache-2.0
 
-# Anthropic SKILL.md compatibility (capability abstract — no model is named).
 allowed_tools:
   - file_read
   - file_write
   - subagent_spawn
+  - tool_invoke
 
-# skills.sh distribution metadata
-homepage: https://github.com/caboc-project/caboc
-install_url: https://raw.githubusercontent.com/caboc-project/caboc/main/skills/caboc-runtime/
-spec_version: caboc-llm/0.1.0
+homepage: https://github.com/Obsilabs/caboc
+install_url: https://raw.githubusercontent.com/Obsilabs/caboc/main/skills/caboc-runtime/
+spec_version: caboc-llm/0.2.0
 ---
 
-# CABOC runtime skill
+# CABOC LLM Runtime — Skill v0.2.0
 
-You are the CABOC LLM runtime. Activate this skill when the user (or a parent
-agent) issues an intent equivalent to:
+You are the runtime for a CABOC routine. Given a routine directory and
+inputs, execute the workflow step by step, dispatching `USE AGENT`
+calls as Task-tool subagents, dispatching `USE TOOL` calls as typed
+library invocations, handling loops + HITL + sub-workflows, and
+persisting state as NDJSON events.
 
-> "run routine `<routine-dir>` with inputs `<json>`"
+## Entry point
 
-Examples that trigger activation:
-- "run the routine at `./routines/code-review` with `{ "diff_path": "x.patch" }`"
-- "execute CABOC routine `routines/triage` on inputs `{ ... }`"
-- "/caboc run routines/foo {...}"
+When the user says "run routine `<name>` with inputs `<json>`", or
+provides equivalent intent:
 
-If the intent is ambiguous (no routine directory, no inputs object), ask the
-user for the missing piece and stop. Otherwise proceed with the algorithm
-below. Do not invent a routine directory.
+1. **Resolve dir** — locate the routine via the six-step precedence
+   (cf. `STANDARDS_ALIASES.md` §2): explicit path → lockfile entry →
+   alias config → bare slug under `routines/` or `examples/` → remote
+   spec (requires prior `caboc add`) → not found.
+2. **Read** `WORKFLOW.md`. Parse frontmatter (YAML). Verify
+   `spec_version` major ≤ 0; on `0.2.x` the full grammar applies; on
+   `0.1.x` only the v0.1 subset.
+3. **Validate inputs** against `frontmatter.io.inputs` schema. Fail if
+   required fields missing.
+4. **Generate `run-id`** — `YYYYMMDD-HHmmss-<6-char-slug>`.
+5. **Open run dir** `runs/<run-id>/`. Initialize `inputs.json`,
+   `transcript.ndjson`, `state.json`. Create `outputs/` on first
+   file-typed write; create `scratch/` for agents declaring
+   `scratch_dirs:`.
+6. **Emit** `{ kind: "run.started", run_id, routine, inputs_keys, ts }`.
+7. **Iterate the PROCEDURE body** in order, respecting control flow.
 
-## Hard constraints
+## Statements supported (v0.2.0)
 
-These hold for every run. Violating any of them is a runtime bug.
+| Statement                | Action                                                |
+| ------------------------ | ----------------------------------------------------- |
+| `STEP <name> <mod+>.`    | Open step scope. Emit `step.started`.                 |
+| `DESCRIPTION.`           | Log to transcript as `step.description`.              |
+| `LET / SET`              | Bind or mutate a local variable.                      |
+| `OUTPUT`                 | Destructure last `USE` result into local names.       |
+| `EMIT`                   | Write to contract outputs.                            |
+| `ASSERT`                 | Throw on false.                                       |
+| `IF / ELSE`              | Take branch.                                          |
+| `GOTO step.<name>.`      | Jump.                                                 |
+| `USE AGENT`              | Spawn a Task subagent (see §USE AGENT).               |
+| `USE TOOL`               | Invoke a typed library method (see §USE TOOL).        |
+| `LOOP UNTIL / WHILE`     | Bounded condition loop (see §Loops).                  |
+| `REPEAT N`               | Fixed-count loop.                                     |
+| `FOR_EACH ... PARALLEL`  | Concurrent fanout with CONCURRENCY cap.               |
+| `COLLECT INTO`           | Gather FOR_EACH outputs.                              |
+| `BREAK / CONTINUE`       | Loop control.                                         |
+| `PARALLEL`               | Fixed-cardinality fanout with JOIN_POLICY.            |
+| `TRY / CATCH / FINALLY`  | Error handling.                                       |
+| `INVOKE WORKFLOW`        | Synchronous sub-routine (see §Subroutines).           |
+| `PROMPT TO / AWAIT FROM` | HITL pause + resume (see §HITL).                      |
+| `ATTESTATION captured`   | Mark step for audit; persist `step.attestation`.      |
 
-1. NEVER name an LLM model (no `claude-*`, `gpt-*`, `gemini-*`, etc.) in any
-   file this skill writes — `transcript.ndjson`, `outputs.json`, `error.json`,
-   `state.json`, repair prompts, anything. Routines reference capabilities
-   (`reasoning`, `classification`, `structured_extraction`, `vision`) and
-   tiers (`fast`, `balanced`, `deep`) only.
-2. NEVER read or modify files outside `routines/<routine>/runs/<run-id>/`
-   during execution. The only files outside that the skill is allowed to read
-   are the routine's own `WORKFLOW.md` and `agents/*.agent.md`. Anything else
-   the user wants the routine to touch must come in through `inputs`.
-3. Default `SESSION` modifier when omitted is `fresh`.
-4. Bind expressions are restricted to: literals (string, number, bool, null,
-   list, object), identifier lookups against `state.json`, dotted member
-   access, arithmetic (`+ - * /`), boolean (`&& || !`), comparison (`== != <
-   <= > >=`), string builtins (`CONCAT`, `LENGTH`, `MIN`, `MAX`, `COALESCE`),
-   and the ternary `IF cond THEN a ELSE b END`. No arbitrary code
-   evaluation. If a routine asks for anything outside this grammar, halt with
-   `run.failed` and `error.kind = "expression.unsupported"`.
-5. Append-only: never rewrite earlier lines of `transcript.ndjson`.
+## USE AGENT dispatch
 
-## Algorithm
-
-### 1. Resolve and load
-
-1. Resolve the routine directory. If it does not exist or `WORKFLOW.md` is
-   missing, fail loudly with a single error message naming the missing path.
-   Do not try alternates.
-2. Read `WORKFLOW.md`. Split on the first `---` fences:
-   - YAML frontmatter — parse as the routine manifest.
-   - Body — keep verbatim. The body is the PROCEDURE; steps are iterated
-     literally over its text.
-3. List `agents/`. Each `<name>.agent.md` is one agent definition. Parse its
-   frontmatter (YAML) and keep the body verbatim as its system prompt.
-
-### 2. Validate inputs
-
-1. Validate the user-supplied inputs against `frontmatter.io.inputs`. The
-   schema is either a JSON Schema object or a Zod-style serialized shape.
-   Treat unknown schema dialects as JSON Schema.
-2. If a required field is missing or a type mismatches, fail before opening
-   the run directory. Error message names the offending field.
-
-### 3. Create the run
-
-1. Generate `run_id` as `YYYYMMDD-HHmmss-<6chars>` where the suffix is six
-   random lowercase alphanumerics. Use UTC for the timestamp.
-2. Create `routines/<routine>/runs/<run_id>/`. Inside it:
-   - Write `inputs.json` — the frozen, validated inputs.
-   - Create empty `transcript.ndjson` and `state.json`.
-   - `state.json` starts as `{ "step": null, "bindings": {}, "outputs": {} }`.
-3. Emit `run.started`:
-   ```json
-   { "kind": "run.started", "run_id": "...", "routine": "...", "inputs_keys": [...], "ts": "..." }
+1. Read `agents/<ref>.agent.md` frontmatter + body.
+2. Resolve session mode (default `fresh`).
+3. Compose the Task subagent prompt:
    ```
+   You are <agent-id>. <description>.
 
-### 4. Walk PROCEDURE
+   <full agent.md body — system prompt>
 
-Iterate STEP blocks in body order. Maintain a `next_step` pointer; default
-advances by source order, but `GOTO step.<name>` overrides it.
-
-For each STEP:
-
-1. Emit `step.started` with `{ step, modifiers, ts }`. Modifiers are anything
-   the STEP header carries (e.g. retry, timeout).
-2. Walk the STEP body line by line and dispatch each construct:
-
-   - `DESCRIPTION "<text>"` — emit `step.description { step, text, ts }`.
-   - `LET <name> = <expr>` — evaluate `<expr>` under the bind-expression
-     grammar (constraint 4). Write `state.bindings[<name>] = <value>`. Emit
-     `binding.set { step, name, ts }` (do NOT log the value if it is large or
-     sensitive; truncate at 256 chars).
-   - `USE AGENT <ref> [SESSION ...] WITH inputs={...}.` — dispatch a Task
-     subagent (see "USE AGENT dispatch" below). On return, the parsed JSON
-     becomes the step's `result` variable.
-   - `OUTPUT <name> FROM <agent-ref>` — bind the most recent return from
-     `<agent-ref>` (in this step) to `state.bindings[<name>]`. Emit
-     `binding.set`.
-   - `EMIT <key> = <expr>` — evaluate `<expr>` and write to
-     `state.outputs[<key>]`. This is what ends up in `outputs.json`. Emit
-     `binding.set { step, name: "outputs." + key, ts }`.
-   - `IF <expr> ... ELSE IF <expr> ... ELSE ... END IF` — evaluate the
-     conditions in order. Take the first true branch (or `ELSE` if none).
-     Emit `branch.taken { step, branch, ts }` where `branch` is the index or
-     `"else"`. Skip the body of the untaken branches entirely.
-   - `GOTO step.<name>` — set `next_step` to `<name>`. Stop walking this
-     STEP body.
-   - `PARALLEL JOIN_POLICY=<policy> ... END PARALLEL` — see "PARALLEL" below.
-   - `ASSERT <expr> [MESSAGE "<text>"]` — evaluate `<expr>`. If false, emit
-     `assertion.failed { step, expr, message, ts }` and fail the run.
-
-3. After the STEP body finishes (or after a `GOTO` sets `next_step`), write
-   `state.json` to disk (overwrite). Emit `step.completed { step, ts }`.
-
-If a STEP has nothing to do (empty body), still emit started/completed.
-
-### 5. USE AGENT dispatch
-
-Given `USE AGENT <ref> [SESSION <mode>] WITH inputs={...}.`:
-
-1. Read `agents/<ref>.agent.md`. Parse frontmatter and body.
-2. Compose the subagent prompt:
-   ```
-   You are <agent.id or ref>. <agent.description>.
-
-   <full agent.md body verbatim>
+   ## Session mode
+   <fresh | continuous(<step>) | fork(<step>)>
 
    ## Inputs
-   <JSON-stringified resolved inputs>
+   <JSON inputs>
 
    ## Output contract
-   Return strict JSON matching this schema. No prose outside the JSON object.
-   <io.outputs schema, stringified>
+   Strict JSON matching <agent's io.outputs schema>.
+   Reply with ONLY the raw JSON object — no prose, no fences.
    ```
-3. Resolve inputs — each value in the `WITH inputs={...}` map may be a
-   literal or a bind expression. Evaluate every expression first, then
-   stringify the resolved object.
-4. Emit `agent.started { step, agent, ref, session, ts }` and the wall-clock
-   start time.
-5. Apply the SESSION modifier:
-   - `fresh` (default) — pass only the composed prompt. No prior history.
-   - `continuous(<step>)` — prepend the transcript stored at
-     `runs/<run-id>/sessions/<agent>.transcript.json` whose `step` field
-     matches `<step>`. Append the new turn to the same file after success.
-   - `fork(<step>)` — load that transcript as in `continuous`, but write the
-     resulting turn to a new file
-     `sessions/<agent>__forkof_<step>__<this-step>.transcript.json`.
-6. Spawn one Task subagent (`general-purpose` subagent_type) with the
-   composed prompt. The subagent must return a JSON object.
-7. Validate the response against `io.outputs`:
-   - On success, bind it as the STEP's `result` and as the agent's most
-     recent return.
-   - On validation failure, emit `agent.repair { step, agent, attempt, errors, ts }`
-     and retry up to 2 times. The repair prompt is the original prompt plus:
-     ```
-     Your previous response failed validation. Errors:
-     <serialized validation errors>
-     Return only the corrected JSON object.
-     ```
-   - After 2 failed repairs, fail the run with `error.kind = "agent.output.invalid"`.
-8. Persist the turn to `sessions/<agent>.transcript.json` (or the fork file)
-   so future `continuous`/`fork` references work.
-9. Emit `agent.completed { step, agent, session, wall_ms, ts }`.
+4. Spawn via `Task` tool. Capability + tier come from
+   `session.{capability, tier}` or `provider_role` resolved via
+   `caboc.config.json.roles`.
+5. Validate output JSON against schema. Up to 2 repair retries
+   (`agent.repair`).
+6. Persist agent turn under
+   `runs/<run-id>/sessions/<agent>.transcript.json` for `continuous`
+   mode.
+7. Emit `{ kind: "agent.completed", step, agent, session, wall_ms, ts }`.
 
-### 6. PARALLEL
+## USE TOOL dispatch
 
-`PARALLEL JOIN_POLICY=<policy> ... END PARALLEL` contains inner STEP-like
-blocks. Each inner block must dispatch exactly one `USE AGENT` (the runtime
-does not nest control flow inside PARALLEL).
+1. Resolve `<pkg>` to `tools/<pkg>/dist/index.js` (or the npm package
+   from `caboc.config.json.tools[<pkg>]`).
+2. Verify the export path `<export>[.<method>]` exists in
+   `dist/index.d.ts` — fail with `CABOC_E_TOOL_METHOD_NOT_FOUND`
+   otherwise.
+3. Confirm determinism compatibility (`DETERMINISTIC` step cannot call
+   `non-deterministic-write`).
+4. If `required_idempotency_key: true`, confirm the inputs object
+   carries `idempotency_key` (or the `IDEMPOTENT BY <expr>` clause
+   resolved to one).
+5. Resolve secrets via `caboc.config.json.tools[<pkg>].secrets`,
+   inject through the factory:
+   ```ts
+   const tool = createXTool({ secrets, config, fetch })
+   await tool.<export>.<method>(inputs)
+   ```
+6. Apply sandbox: deny `fetch` outside `network_egress`; deny FS
+   access outside `filesystem_access`.
+7. Bind the return value into local scope; emit `tool.completed`.
 
-1. Emit `parallel.started { step, branches: [...], policy, ts }`.
-2. Spawn ALL inner Task subagent calls in one assistant message. The runtime
-   batches them; the underlying host runs them concurrently.
-3. Apply `JOIN_POLICY`:
-   - `all` — wait for N successful returns (N = branch count). Any failure
-     fails the parallel block.
-   - `first` — first successful return wins; the rest are ignored.
-   - `majority` — wait until `floor(N/2) + 1` succeed.
-   - `quorum:K` — wait until exactly `K` succeed (literal K).
-4. Bind outputs by inner step name. For `first`, only the winner's binding
-   is set. For `majority`/`quorum`, every successful branch's binding is set.
-5. Emit `parallel.completed { step, successes, failures, ts }`.
+## Loops
 
-### 7. Termination
+- `LOOP UNTIL <expr> MAX_ITERATIONS N DO ... END LOOP.` — per-iteration
+  events `loop.iteration.start` / `.end`; expose `_iteration` inside.
+  Throw `CABOC_E_LOOP_BUDGET_EXHAUSTED` if N reached without the
+  condition becoming true.
+- `LOOP WHILE <expr> MAX_ITERATIONS N DO ... END LOOP.` — entry-test.
+- `REPEAT N DO ... END REPEAT.` — sugar.
+- `FOR_EACH <var> IN <coll> DO ... END FOR_EACH.` — sequential.
+- `FOR_EACH <var> IN <coll> PARALLEL CONCURRENCY=<n> DO ... END FOR_EACH.`
+  — spawn up to `<n>` Task subagents concurrently. Output ordering
+  preserved via `COLLECT INTO`. Emit `parallel.spawn` per slot.
+- `COLLECT INTO <name>: Array<T>` or `Map<K, V> KEY <expr>`.
+- `BREAK` / `CONTINUE`. Inside `PARALLEL FOR_EACH`, `BREAK` cancels
+  in-flight slots; `CONTINUE` raises `CABOC_E_BREAK_IN_PARALLEL`.
 
-When `next_step` is `null` (no GOTO and source order exhausted) or PROCEDURE
-reaches an explicit END:
+## HITL
 
-1. Write `runs/<run-id>/outputs.json` from `state.outputs`. Match the
-   `frontmatter.io.outputs` schema; emit `run.failed` if the final
-   outputs object does not validate.
-2. Emit `run.completed { run_id, outputs_keys, wall_ms, ts }`.
-3. Reply to the user with:
-   - The absolute path to `runs/<run-id>/`.
-   - A one-line summary derived from `state.outputs` (top-level keys).
+When a `STEP HITL` is reached:
 
-### 8. On error
+1. Process the inner `PROMPT TO role=<role> ...` — assemble payload.
+2. Emit `hitl.prompt` + `hitl.awaiting`.
+3. **Exit the run** with `state.json` `status: "paused"` and
+   `awaiting: { step, varName, schema_ref }`.
+4. `caboc resume <run-dir> --decision-file <file>` continues the run
+   after validating the decision and persisting `hitl.resumed`.
 
-Any failure (input validation, expression error, agent output invalid after
-repairs, assertion, schema mismatch on outputs):
+## Subroutines (`INVOKE WORKFLOW`)
 
-1. Emit `run.failed { error: { kind, message, step?, agent?, details? }, ts }`.
-2. Write `runs/<run-id>/error.json` with the same payload.
-3. Reply to the user with a short diagnosis: error kind, step where it
-   happened, the field or assertion that failed.
+1. Resolve `<name>` via the six-step alias precedence.
+2. Check `caboc.config.json.subroutines.max_depth` (default 4).
+3. Spawn a nested run; child `outputs.json` becomes the bound name on
+   the next line.
+4. Transcript prefix: `sub.<parent-step>.<child-step>`.
+5. Emit `subroutine.invoke`, `subroutine.completed`, `subroutine.failed`.
 
-Do not attempt recovery beyond the explicit repair retries on agent output.
+## File-typed outputs
 
-## NDJSON event types
+For each `outputs.<name>.type: file` or `file_array` declaration:
 
-Every event is one line of JSON in `transcript.ndjson`. Every event has
-`kind` and `ts` (ISO 8601 UTC, e.g. `"2026-05-11T14:03:22.117Z"`).
+- Expect the file under `runs/<run-id>/outputs/<path>` by run end.
+- `outputs.json` carries a JSON index of file paths relative to the
+  run dir.
+- Missing declared file outputs → `CABOC_E_FILE_OUTPUT_MISSING`.
 
-| kind | when |
-| --- | --- |
-| `run.started` | after run dir created |
-| `step.started` | entering each STEP |
-| `step.description` | when STEP body has a `DESCRIPTION` |
-| `agent.started` | before subagent spawn |
-| `agent.completed` | after subagent returns and validates |
-| `agent.repair` | per failed validation attempt |
-| `binding.set` | after `LET` / `OUTPUT` / `EMIT` |
-| `branch.taken` | after IF/ELSE resolution |
-| `parallel.started` | entering PARALLEL block |
-| `parallel.completed` | after PARALLEL JOIN_POLICY satisfied |
-| `assertion.failed` | when `ASSERT` evaluates false |
-| `step.completed` | leaving each STEP (success or branched out) |
-| `subroutine.invoked` | when one routine calls another |
-| `run.completed` | after `outputs.json` written |
-| `run.failed` | any unrecoverable error |
+## Provider roles
 
-Full field reference for each event lives in
-`assets/state-format.md`. The supported body grammar lives in
-`assets/grammar-subset.md`.
+If an agent declares `provider_role: <role-id>`:
 
-## Worked invocation (mental model)
+- Look up `caboc.config.json.roles[<role-id>]` for
+  `(capability, tier, constraints)`.
+- Pass these as the subagent dispatch parameters; agent's explicit
+  `session.{capability, tier}` override.
+- Emit `agent.role_resolved` per invocation (NOT the concrete model
+  name — that lives in `routines.lock` only).
 
-User says: "run routine `routines/code-review` with inputs `{ "diff_path": "x.patch" }`".
+## Termination
 
-1. Read `routines/code-review/WORKFLOW.md` → parse frontmatter, hold body.
-2. Validate inputs against `io.inputs`. OK.
-3. Create `routines/code-review/runs/20260511-140322-a3kf9q/`.
-4. Emit `run.started`.
-5. For each STEP in body: emit `step.started`, dispatch its constructs (each
-   `USE AGENT` becomes one Task subagent call), update `state.json`, emit
-   `step.completed`.
-6. At END: write `outputs.json`, emit `run.completed`, reply with run dir
-   path.
+When PROCEDURE has no next statement OR a step EMITs every declared
+output and reaches END PROCEDURE:
 
-That's it. The skill is intentionally narrow — interpret the routine,
-dispatch agents as subagents, log everything, never name a model.
+1. Verify every declared output is bound (or every declared `file`
+   output is on disk); else `CABOC_E_CONTRACT_VIOLATION`.
+2. Write `runs/<run-id>/outputs.json`.
+3. Emit `run.completed`.
+4. Reply with a one-line summary including the run-dir path.
+
+## On error
+
+Any uncaught error → emit `run.failed`, write
+`runs/<run-id>/error.json` with `cause`, `where`, and last
+`state.json` snapshot. Reply with the diagnostic.
+
+## Conventions you must obey
+
+- **Never** name an LLM model in any file the skill produces.
+- **Never** read or modify files outside
+  `routines/<routine>/runs/<run-id>/` during execution, except to read
+  `WORKFLOW.md`, `agents/*`, `tools/*` (read-only), and routine-declared
+  `scratch_dirs:` (read+write).
+- Default `SESSION = fresh` when omitted.
+- Bind expressions limited to the §15 stdlib of `STANDARDS_GRAMMAR`.
+  No arbitrary code eval.
+- Be terse in transcript event payloads — keep keys, drop prose.
